@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "rollover-weekly-todo-plugin",
+	"name": "Rollover Weekly Todo Plugin",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"author": "Shubham Sethi",
+	"authorUrl": "https://shubhamsethi.com",
 	"isDesktopOnly": false
 }
