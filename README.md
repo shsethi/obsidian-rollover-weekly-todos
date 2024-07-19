@@ -16,10 +16,7 @@ Alternatively, you can use the icon in ribbon bar.
 
 ## Requirements
 
-- [ ] You must have `Periodic Notes` plugin installed AND the **Weekly Notes** setting toggled on
-- [ ] A Note folder set in one of these plugins. Inside it you must have:
-  1. 2 or more notes
-  2. All notes must be named in the format you use for daily notes (for example `2021-08-29` for `YYYY-MM-DD` )
+- You must have `Periodic Notes` plugin installed AND the **Weekly Notes** setting toggled on
 
 
 ## Settings
