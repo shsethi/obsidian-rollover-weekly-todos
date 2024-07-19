@@ -71,8 +71,8 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 			return;
 		}
 
-		console.log("Current week note:", file.name);
-		console.log("Previous week note:", previousWeekNote.name);
+		// console.log("Current week note:", file.name);
+		// console.log("Previous week note:", previousWeekNote.name);
 
 		// TODO: Implement your rollover logic here
 		// Read tasks from previousWeekNote and append to file
