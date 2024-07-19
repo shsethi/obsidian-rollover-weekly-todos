@@ -19,6 +19,19 @@ Alternatively, you can use the icon in ribbon bar.
 - You must have `Periodic Notes` plugin installed AND the **Weekly Notes** setting toggled on
 
 
+## Use the plugin before the release?
+
+- Open Obsidian and go to the community plugins tab.
+
+- Search for BRAT and install it.
+
+- Click on the Add Beta Plugin button.
+
+- Paste the plugin link: https://github.com/shsethi/obsidian-rollover-weekly-todos
+
+- Click Add Plugin.
+
+
 ## Settings
 
 ### 1. Disable automatic rollover
