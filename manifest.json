@@ -1,9 +1,9 @@
 {
 	"id": "rollover-weekly-todo-plugin",
 	"name": "Rollover Weekly Todo Plugin",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Rollover todo items from the previous weekly note.",
 	"author": "Shubham Sethi",
 	"authorUrl": "https://shubhamsethi.com",
 	"isDesktopOnly": false

@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-rollover-weekly-todos",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "An obsidian plugin that rolls over todo items from the previous weekly note",
 	"main": "main.js",
 	"scripts": {
