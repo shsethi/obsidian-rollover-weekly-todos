@@ -265,7 +265,7 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 
 		this.addCommand({
 			id: "obsidian-rollover-weekly-todos-rollover",
-			name: "Rollover Weekly Todos Now",
+			name: "Rollover Now",
 			callback: () => this.rollover(),
 		});
 
