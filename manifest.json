@@ -1,10 +1,10 @@
 {
-	"id": "rollover-weekly-todo",
-	"name": "Rollover Weekly Todo",
-	"version": "1.0.6",
-	"minAppVersion": "0.15.0",
-	"description": "Rollover todo items from the previous weekly note.",
-	"author": "Shubham Sethi",
-	"authorUrl": "https://shubhamsethi.com",
-	"isDesktopOnly": false
+  "id": "rollover-weekly-todo",
+  "name": "Rollover Weekly Todo",
+  "version": "1.0.7",
+  "minAppVersion": "0.15.0",
+  "description": "Rollover todo items from the previous weekly note.",
+  "author": "Shubham Sethi",
+  "authorUrl": "https://shubhamsethi.com",
+  "isDesktopOnly": false
 }

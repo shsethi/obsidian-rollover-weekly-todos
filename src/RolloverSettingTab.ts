@@ -35,6 +35,7 @@ export default class RolloverSettingTab extends PluginSettingTab {
 	async display(): Promise<void> {
 		const templateHeadings: string[] = await this.getTemplateHeadings();
 
+
 		this.containerEl.empty();
 		new Setting(this.containerEl)
 			.setName("Template heading")
@@ -45,6 +46,7 @@ export default class RolloverSettingTab extends PluginSettingTab {
 				dropdown
 					.addOptions({
 						...templateHeadings.reduce((acc, heading) => {
+              // @ts-ignore
 							acc[heading] = heading;
 							return acc;
 						}, {}),
