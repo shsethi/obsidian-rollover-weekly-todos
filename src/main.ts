@@ -49,7 +49,7 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 
 		if (!this.isWeeklyNotesEnabled()) {
 			new Notice(
-			  "RolloverTodosPlugin unable to rollover unfinished todos: Please enable Periodic Notes (with weekly notes enabled).",
+			  "Rollover weekly todos is unable to rollover unfinished todos: Please enable Periodic Notes (with weekly notes enabled).",
 			  10000
 			);
 			return;
@@ -80,9 +80,9 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		// get unfinished todos from yesterday, if exist
 		let todos_lastWeek = await this.getAllUnfinishedTodos(previousWeekNote);
 
-		console.log(
-			`rollover-daily-todos: ${todos_lastWeek.length} todos found in ${previousWeekNote.basename}.md`
-		);
+		// console.log(
+		// 	`rollover-daily-todos: ${todos_lastWeek.length} todos found in ${previousWeekNote.basename}.md`
+		// );
 
 		if (todos_lastWeek.length == 0) {
 			return;
@@ -256,7 +256,7 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"reset",
-			"RollOver Weekly Todos",
+			"RollOver weekly todos",
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
 				this.rollover();
@@ -264,13 +264,13 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		);
 
 		this.addCommand({
-			id: "obsidian-rollover-weekly-todos-rollover",
-			name: "Rollover Now",
+			id: "rollover",
+			name: "Rollover now",
 			callback: () => this.rollover(),
 		});
 
 		this.addCommand({
-			id: "obsidian-rollover-daily-todos-undo",
+			id: "undo",
 			name: "Undo last rollover",
 			checkCallback: (checking) => {
 			  // no history, don't allow undo
