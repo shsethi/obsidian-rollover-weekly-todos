@@ -1,5 +1,5 @@
 import { App, Setting, PluginSettingTab, TAbstractFile, TFile } from "obsidian"; 
-import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
+import { getWeeklyNoteSettings } from "obsidian-daily-notes-interface";
 import RolloverWeeklyTodosPlugin from "./main";
 
 export default class RolloverSettingTab extends PluginSettingTab {
@@ -11,7 +11,7 @@ export default class RolloverSettingTab extends PluginSettingTab {
 	}
 
 	async getTemplateHeadings(): Promise<string[]> {
-		const { template } = getDailyNoteSettings();
+		const { template } = getWeeklyNoteSettings();
 		if (!template) return [];
 
 		let file = this.app.vault.getAbstractFileByPath(template);

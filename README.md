@@ -3,7 +3,7 @@
 
 This Obsidian plugin will rollover any incomplete todo items from the previous weekly note to current week's weekly note.
 
-It's heavily inspired from the  [obsidian-rollover-daily-todos](https://github.dev/lumoe/obsidian-rollover-daily-todos/tree/master)
+It's heavily inspired from the  [obsidian-rollover-daily-todos](https://github.com/lumoe/obsidian-rollover-daily-todos/tree/master)
 
 Since the existing plugin only allows rollover of daily notes, but for I prefer working with weekly notes as daily notes is too granular for my workflow.
 
