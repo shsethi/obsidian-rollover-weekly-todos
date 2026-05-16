@@ -1,4 +1,4 @@
-import { App, Setting, PluginSettingTab, TAbstractFile, TFile } from "obsidian"; 
+import { App, normalizePath, Setting, PluginSettingTab, TFile } from "obsidian";
 import { getWeeklyNoteSettings } from "obsidian-daily-notes-interface";
 import RolloverWeeklyTodosPlugin from "./main";
 
@@ -11,13 +11,36 @@ export default class RolloverSettingTab extends PluginSettingTab {
 	}
 
 	async getTemplateHeadings(): Promise<string[]> {
-		const { template } = getWeeklyNoteSettings();
+		const { folder, template } = getWeeklyNoteSettings();
 		if (!template) return [];
 
-		let file = this.app.vault.getAbstractFileByPath(template);
+		const candidatePaths = new Set<string>();
+		const addCandidate = (path: string) => {
+			const normalizedPath = normalizePath(path.trim());
+			if (normalizedPath) {
+				candidatePaths.add(normalizedPath);
+			}
+		};
 
-		if (!file && template.endsWith(".md")) {
-			file = this.app.vault.getAbstractFileByPath(template.slice(0, -3)); // Try without ".md"
+		addCandidate(template);
+		if (template.endsWith(".md")) {
+			addCandidate(template.slice(0, -3)); // Try without ".md"
+		}
+
+		if (folder) {
+			addCandidate(`${folder}/${template}`);
+			if (template.endsWith(".md")) {
+				addCandidate(`${folder}/${template.slice(0, -3)}`);
+			}
+		}
+
+		let file: TFile | null = null;
+		for (const path of candidatePaths) {
+			const maybeFile = this.app.vault.getAbstractFileByPath(path);
+			if (maybeFile instanceof TFile) {
+				file = maybeFile;
+				break;
+			}
 		}
 
 		if (!(file instanceof TFile)) {
@@ -55,6 +78,42 @@ export default class RolloverSettingTab extends PluginSettingTab {
 					.setValue(this.plugin?.settings.templateHeading)
 					.onChange((value) => {
 						this.plugin.settings.templateHeading = value;
+						this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(this.containerEl)
+			.setName("Preserve section structure")
+			.setDesc(
+				"Roll over the content under the template heading by section, instead of appending todos as a flat list. Standalone bold labels such as **Work** are treated as sections."
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.preserveSectionStructure || false)
+					.onChange((value) => {
+						this.plugin.settings.preserveSectionStructure = value;
+						this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(this.containerEl)
+			.setName("Stop preserving before heading")
+			.setDesc(
+				"Optional. When preserving section structure, stop before this heading instead of including everything under the template heading."
+			)
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						none: "None",
+						...templateHeadings.reduce((acc, heading) => {
+              // @ts-ignore
+							acc[heading] = heading;
+							return acc;
+						}, {}),
+					})
+					.setValue(this.plugin.settings.sectionEndHeading || "none")
+					.onChange((value) => {
+						this.plugin.settings.sectionEndHeading = value;
 						this.plugin.saveSettings();
 					})
 			);

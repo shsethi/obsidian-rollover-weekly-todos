@@ -49,3 +49,11 @@ Toggling this setting on will remove incomplete todos from the previous weekly n
 
 ### 4. Remove empty todos in rollover
 By default, this plugin will roll over anything that has a checkbox, whether it has content or not. Toggling this setting on will ignore empty todos. If you have #2 from above toggled on, it will also delete empty todos.
+
+### 5. Preserve section structure
+When this is enabled, todos are rolled over under the same sections within the selected template heading instead of being appended as a flat list. Markdown headings and standalone bold labels, such as `**Work**`, are treated as sections.
+
+See [Preserving Weekly Sections](docs/section-rollover.md) for a before-and-after example.
+
+### 6. Stop preserving before heading
+If your selected template heading contains content that should not participate in rollover, choose a boundary heading here. For example, if `# Tasks` contains your tasks and is followed by `## Reference`, selecting `## Reference` keeps the reference block untouched.

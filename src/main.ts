@@ -5,6 +5,12 @@ import {
 } from "obsidian-daily-notes-interface";
 // import moment from "moment";
 import { getTodos } from "./GetTodos";
+import {
+	applySectionRollover,
+	buildSectionRolloverPayload,
+	hasMeaningfulLine,
+	removeRolledTasksFromSection,
+} from "./SectionRollover";
 import UndoModal from "./UndoModal";
 import RolloverSettingTab from "./RolloverSettingTab";
 
@@ -14,6 +20,8 @@ interface RolloverWeeklyTodosSettings {
 	removeEmptyTodos: boolean;
 	rolloverChildren: boolean;
 	rolloverOnFileCreate: boolean;
+	preserveSectionStructure: boolean;
+	sectionEndHeading: string;
 }
 
 const DEFAULT_SETTINGS: RolloverWeeklyTodosSettings = {
@@ -22,6 +30,8 @@ const DEFAULT_SETTINGS: RolloverWeeklyTodosSettings = {
 	removeEmptyTodos: true,
 	rolloverChildren: true,
 	rolloverOnFileCreate: true,
+	preserveSectionStructure: false,
+	sectionEndHeading: "none",
 };
 
 // setup undo history
@@ -56,8 +66,14 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		}
 
 	
-		const { templateHeading, deleteOnComplete, removeEmptyTodos } =
-			this.settings;
+		const {
+			templateHeading,
+			deleteOnComplete,
+			removeEmptyTodos,
+			preserveSectionStructure,
+			rolloverChildren,
+			sectionEndHeading,
+		} = this.settings;
 
 		// const { moment } = window;
 		if (!file) {
@@ -74,17 +90,33 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		// console.log("Current week note:", file.name);
 		// console.log("Previous week note:", previousWeekNote.name);
 
-		// TODO: Implement your rollover logic here
-		// Read tasks from previousWeekNote and append to file
-
-		// get unfinished todos from yesterday, if exist
-		let todos_lastWeek = await this.getAllUnfinishedTodos(previousWeekNote);
+		const useSectionRollover =
+			preserveSectionStructure && templateHeading !== "none";
+		const previousWeekNoteContent = await this.app.vault.read(previousWeekNote);
+		const sectionOptions = {
+			removeEmptyTodos,
+			withChildren: rolloverChildren,
+			rootHeading: templateHeading,
+			endHeading: sectionEndHeading,
+		};
+		const sectionPayload = useSectionRollover
+			? buildSectionRolloverPayload(previousWeekNoteContent, sectionOptions)
+			: null;
+		const useStructuredPayload = Boolean(
+			useSectionRollover && sectionPayload?.foundRoot
+		);
+		const todos_lastWeek = useStructuredPayload
+			? sectionPayload?.lines || []
+			: await this.getAllUnfinishedTodos(previousWeekNote);
 
 		// console.log(
 		// 	`rollover-daily-todos: ${todos_lastWeek.length} todos found in ${previousWeekNote.basename}.md`
 		// );
 
-		if (todos_lastWeek.length == 0) {
+		if (
+			(useStructuredPayload && !hasMeaningfulLine(todos_lastWeek)) ||
+			(!useStructuredPayload && todos_lastWeek.length == 0)
+		) {
 			return;
 		}
 
@@ -96,10 +128,16 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 		};
 
 		// Potentially filter todos from yesterday for today
-		let todosAdded = 0;
-		let emptiesToNotAddToTomorrow = 0;
-		let todos_today = !removeEmptyTodos ? todos_lastWeek : [];
-		if (removeEmptyTodos) {
+		let todosAdded = useStructuredPayload ? sectionPayload?.todoCount || 0 : 0;
+		let emptiesToNotAddToTomorrow = useStructuredPayload
+			? sectionPayload?.emptyCount || 0
+			: 0;
+		let todos_today = useStructuredPayload
+			? todos_lastWeek
+			: !removeEmptyTodos
+			? todos_lastWeek
+			: [];
+		if (!useStructuredPayload && removeEmptyTodos) {
 			todos_lastWeek.forEach((line, i) => {
 				const trimmedLine = (line || "").trim();
 				if (trimmedLine != "- [ ]" && trimmedLine != "- [  ]") {
@@ -109,7 +147,7 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 					emptiesToNotAddToTomorrow++;
 				}
 			});
-		} else {
+		} else if (!useStructuredPayload) {
 			todosAdded = todos_lastWeek.length;
 		}
 
@@ -122,8 +160,16 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 			undoHistoryInstance.today.oldContent = dailyNoteContent; // Update oldContent
 			const todos_todayString = `\n${todos_today.join("\n")}`;
 
-			// If template heading is selected, try to rollover to template heading
-			if (templateHeadingSelected) {
+			if (useStructuredPayload) {
+				const updatedDailyNote = applySectionRollover(
+					dailyNoteContent,
+					todos_today,
+					sectionOptions
+				);
+				dailyNoteContent = updatedDailyNote.content;
+				templateHeadingNotFoundMessage = updatedDailyNote.message;
+			} else if (templateHeadingSelected) {
+				// If template heading is selected, try to rollover to template heading
 				const contentAddedToHeading = dailyNoteContent.replace(
 					templateHeading,
 					`${templateHeading}${todos_todayString}`
@@ -137,8 +183,9 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 
 			// Rollover to bottom of file if no heading found in file, or no heading selected
 			if (
-				!templateHeadingSelected ||
-				templateHeadingNotFoundMessage.length > 0
+				!useStructuredPayload &&
+				(!templateHeadingSelected ||
+					templateHeadingNotFoundMessage.length > 0)
 			) {
 				dailyNoteContent += todos_todayString;
 			}
@@ -148,22 +195,27 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 
 		// if deleteOnComplete, get yesterday's content and modify it
 		if (deleteOnComplete) {
-			let previousWeekNoteContent = await this.app.vault.read(
-				previousWeekNote
-			);
 			undoHistoryInstance.previousDay = {
 				file: previousWeekNote,
 				oldContent: `${previousWeekNoteContent}`,
 			};
-			let lines = previousWeekNoteContent.split("\n");
+			let modifiedContent = previousWeekNoteContent;
+			if (useStructuredPayload) {
+				modifiedContent = removeRolledTasksFromSection(
+					previousWeekNoteContent,
+					sectionOptions
+				).content;
+			} else {
+				let lines = previousWeekNoteContent.split("\n");
 
-			for (let i = lines.length; i >= 0; i--) {
-				if (todos_lastWeek.includes(lines[i])) {
-					lines.splice(i, 1);
+				for (let i = lines.length; i >= 0; i--) {
+					if (todos_lastWeek.includes(lines[i])) {
+						lines.splice(i, 1);
+					}
 				}
-			}
 
-			const modifiedContent = lines.join("\n");
+				modifiedContent = lines.join("\n");
+			}
 			await this.app.vault.modify(previousWeekNote, modifiedContent);
 		}
 
@@ -193,7 +245,11 @@ export default class RolloverWeeklyTodosPlugin extends Plugin {
 			emptiesToNotAddToTomorrowString.length > 0 ? " " : ""
 		}`;
 
-		let allParts = [part1, part2, part3];
+		const sectionPart =
+			useStructuredPayload
+				? "- Section structure preserved."
+				: "";
+		let allParts = [part1, part2, part3, sectionPart];
 		let nonBlankLines: string[] = [];
 		allParts.forEach((part) => {
 			if (part.length > 0) {
